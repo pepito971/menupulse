@@ -4,6 +4,7 @@ import session from 'express-session';
 import helmet from 'helmet';
 import { pool } from './db/client.ts';
 import { requireSameOrigin } from './lib/origin-check.ts';
+import { SESSION_COOKIE } from './lib/sessions.ts';
 
 export interface AppOptions {
   isProduction: boolean;
@@ -45,7 +46,7 @@ export function createApp(options: AppOptions): Express {
   const PgStore = connectPgSimple(session);
   const sessions = session({
     store: new PgStore({ pool, createTableIfMissing: true }),
-    name: 'mp.sid',
+    name: SESSION_COOKIE,
     secret: options.sessionSecret,
     resave: false,
     saveUninitialized: false,

@@ -15,6 +15,13 @@
       "when": 1793406851564,
       "tag": "0001_jeux",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793431999406,
+      "tag": "0002_back_office",
+      "breakpoints": true
     }
   ]
 }

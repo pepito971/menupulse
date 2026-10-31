@@ -17,6 +17,8 @@ import { GameRooms } from './games/game-rooms.ts';
 import { GAMES_BY_ID } from './games/registry.ts';
 import { html, raw } from './lib/html.ts';
 import { createPageRenderer } from './lib/pages.ts';
+import { createAdminRouter } from './routes/admin/index.ts';
+import { createAuthRouter } from './routes/auth.ts';
 import { createPlayRouter } from './routes/play.ts';
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -47,6 +49,8 @@ const app = createApp({
   sessionSecret: sessionSecret || 'secret-de-developpement-uniquement',
   allowedOrigins,
   mountApi: (api) => {
+    api.use('/api/auth', createAuthRouter());
+    api.use('/api/admin', createAdminRouter());
     api.use('/api/play', createPlayRouter(rooms));
   },
 });

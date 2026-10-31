@@ -29,7 +29,8 @@ npm run dev            # http://localhost:3100 (Vite en middleware, migrations a
 | `npm run lint` | ESLint |
 | `npm run db:generate` | génère une migration à partir de `server/db/schema.ts` |
 | `npm run db:migrate` | applique les migrations |
-| `npm run seed:demo` | crée l'établissement de démonstration (jeux : http://localhost:3100/jouer/demo-table-1) |
+| `npm run seed:demo` | crée l'établissement de démonstration (jeux : http://localhost:3100/jouer/demo-table-1) et ses comptes du back-office (mot de passe `comptoir-demo`) |
+| `npm run account:create -- --email … --name "…" --organization "…"` | crée le compte d'un propriétaire et son organisation ; affiche un mot de passe provisoire |
 
 ## Arborescence
 

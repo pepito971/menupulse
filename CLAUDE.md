@@ -40,6 +40,17 @@ Ce fichier documente les conventions et les décisions qui ne se déduisent pas 
 - **Une seule instance Railway au départ** : l'état des parties est en mémoire ; un redéploiement termine les parties en cours (à faire aux heures creuses). Plusieurs instances = Redis derrière l'interface du moteur.
 - **Lighthouse CI** : LCP ≤ 1 s en profil bureau (médiane de 5 passages), ≈ 2 s en mobile simulé ; le TBT remplace l'INP (non mesurable en laboratoire). Le **garde-fou bloquant est le poids** (`scripts/check-budget.ts`, budgets par point d'entrée, gzip).
 
+## Back-office
+
+API sous `/api/auth` (connexion) et `/api/admin` (organisations, établissements, tables, équipe) ; **interface en attente de la maquette de l'utilisateur**.
+
+- **Pas d'email pour l'instant** : le compte du propriétaire est créé par `npm run account:create`, ceux de l'équipe par un responsable, toujours avec un **mot de passe provisoire** affiché une seule fois et à changer à la première connexion (`users.password_change_required` : tant qu'il est vrai, seules `/api/auth/me` et `/api/auth/password` répondent). Inscription en ligne, invitations et mot de passe oublié attendent le choix d'un fournisseur d'emails. Ajouter un compte qui existe déjà (membre d'une autre organisation) est refusé jusqu'aux invitations, qui demandent l'accord du titulaire ; pour la même raison, un responsable ne réinitialise pas le mot de passe d'un compte qui appartient aussi à une autre organisation.
+- **Droits** dans `shared/roles.ts` (partagé : le navigateur masque ce que le serveur refuserait). Propriétaire : tout. Gérant : réglages de l'établissement (pas l'adresse publique `slug` ni les modules, liés à l'abonnement), tables, et les **employés seulement**, dans les limites de ses propres établissements (`isWithinScope`). Employé : consultation (ruptures et jeux viendront avec la carte). **Personne ne modifie son propre accès**, et seul un propriétaire touche à un propriétaire : l'organisation garde donc toujours un propriétaire.
+- **Droits relus en base à chaque requête** (`server/admin/access.ts`) : un membre retiré ou restreint perd l'accès aussitôt ; mot de passe changé ou réinitialisé = autres sessions supprimées (`revokeUserSessions`). Organisation ou établissement étranger → **404**, pas 403.
+- `member_establishments` porte une clé composite vers `establishments (organization_id, id)` : la base refuse d'ouvrir à un membre l'établissement d'une autre organisation. Un propriétaire n'a jamais de liste.
+- Modifier les réglages ou les modules fait avancer `menu_version`. Supprimer une table efface les statistiques de ses parties (cascade) ; la désactiver les garde. Nouveau jeton de QR code = l'ancien lien cesse aussitôt de fonctionner.
+- **URL imprimée dans le QR code d'une table : à décider** avant d'imprimer quoi que ce soit (aujourd'hui `/jouer/<jeton>` ; l'écran de choix bar/restaurant n'existe pas encore).
+
 ## Jeux de table (Tapsy)
 
 Sept jeux au lancement : Quiz du Comptoir, Tu préfères ?, L'Intrus, Action ou Vérité, Le Mot Interdit, La Boisson Mystère et Le Jack-Pot de l'Happy Hour (ces deux derniers sont des leviers commerciaux, désactivés par défaut). Entrée : `/jouer/<jeton QR de la table>/<langue>`.
@@ -68,9 +79,9 @@ Sept jeux au lancement : Quiz du Comptoir, Tu préfères ?, L'Intrus, Action ou 
 
 ## Vérification
 
-- `npm test` (tests `node:test` en TypeScript, `test/**/*.test.ts`), `npm run typecheck`, `npm run lint`, `npm run build` (inclut le budget de poids).
+- `npm test` (tests `node:test` en TypeScript, `test/**/*.test.ts`, `.env` chargé), `npm run typecheck`, `npm run lint`, `npm run build` (inclut le budget de poids). Les tests de l'API du back-office tournent sur la base de `DATABASE_URL` (sautés sans elle) : ils créent leurs organisations et comptes (`…@test.menupulse.fr`) et les suppriment.
 - Port local par défaut **3100** (Planevo occupe le 3000 sur cette machine).
-- `npm run seed:demo` crée « Le Comptoir Démo » : jeux sur http://localhost:3100/jouer/demo-table-1 (Happy Hour toute la journée pour essayer le Jack-Pot).
+- `npm run seed:demo` crée « Le Comptoir Démo » : jeux sur http://localhost:3100/jouer/demo-table-1 (Happy Hour toute la journée pour essayer le Jack-Pot) et trois comptes du back-office, un par rôle (`proprietaire@`, `gerant@`, `serveur@demo.menupulse.fr`, mot de passe `comptoir-demo`).
 - **Base locale dédiée** (`menupulse`, rôle `menupulse` propriétaire, mot de passe aléatoire) créée par `scripts/create-local-db.ps1`, à lancer par l'utilisateur : il faut le mot de passe administrateur `postgres`, que Claude n'a pas. Jamais la base ni le rôle de Planevo (`geodesign`).
 - **Python sous Windows écrit des fins de ligne CRLF** (`open(..., 'w')`) : ouvrir avec `newline=''` pour garder les LF du dépôt.
 - **Piège des outils d'écriture** : une séquence d'échappement Unicode (barre oblique inverse, `u`, quatre chiffres hexadécimaux) écrite dans un fichier peut être décodée en vrai caractère (un séparateur de ligne a cassé une expression régulière). Construire ces caractères avec `String.fromCharCode` ou s'en passer.

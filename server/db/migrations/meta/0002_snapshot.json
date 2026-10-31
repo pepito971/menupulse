@@ -1,0 +1,1918 @@
+{
+  "id": "3ab62250-eed3-483d-b9f9-41320b109f0d",
+  "prevId": "5cb5691e-bea6-4765-b44f-073da3405343",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.categories": {
+      "name": "categories",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "establishment_id": {
+          "name": "establishment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "module": {
+          "name": "module",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "is_visible": {
+          "name": "is_visible",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "translations": {
+          "name": "translations",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        }
+      },
+      "indexes": {
+        "categories_menu_idx": {
+          "name": "categories_menu_idx",
+          "columns": [
+            {
+              "expression": "establishment_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "module",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "position",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "categories_establishment_id_establishments_id_fk": {
+          "name": "categories_establishment_id_establishments_id_fk",
+          "tableFrom": "categories",
+          "tableTo": "establishments",
+          "columnsFrom": [
+            "establishment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "categories_tenant_id_uq": {
+          "name": "categories_tenant_id_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "establishment_id",
+            "id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "categories_module_check": {
+          "name": "categories_module_check",
+          "value": "\"categories\".\"module\" IN ('tapsy', 'tableo')"
+        },
+        "categories_name_check": {
+          "name": "categories_name_check",
+          "value": "jsonb_typeof(\"categories\".\"name\") = 'object' AND \"categories\".\"name\" <> '{}'::jsonb"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.dining_tables": {
+      "name": "dining_tables",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "establishment_id": {
+          "name": "establishment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "label": {
+          "name": "label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "qr_token": {
+          "name": "qr_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "dining_tables_establishment_id_establishments_id_fk": {
+          "name": "dining_tables_establishment_id_establishments_id_fk",
+          "tableFrom": "dining_tables",
+          "tableTo": "establishments",
+          "columnsFrom": [
+            "establishment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "dining_tables_qrToken_unique": {
+          "name": "dining_tables_qrToken_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "qr_token"
+          ]
+        },
+        "dining_tables_tenant_id_uq": {
+          "name": "dining_tables_tenant_id_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "establishment_id",
+            "id"
+          ]
+        },
+        "dining_tables_label_uq": {
+          "name": "dining_tables_label_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "establishment_id",
+            "label"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.establishment_games": {
+      "name": "establishment_games",
+      "schema": "",
+      "columns": {
+        "establishment_id": {
+          "name": "establishment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "game_id": {
+          "name": "game_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_enabled": {
+          "name": "is_enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "settings": {
+          "name": "settings",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "establishment_games_establishment_id_establishments_id_fk": {
+          "name": "establishment_games_establishment_id_establishments_id_fk",
+          "tableFrom": "establishment_games",
+          "tableTo": "establishments",
+          "columnsFrom": [
+            "establishment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "establishment_games_establishment_id_game_id_pk": {
+          "name": "establishment_games_establishment_id_game_id_pk",
+          "columns": [
+            "establishment_id",
+            "game_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "establishment_games_id_check": {
+          "name": "establishment_games_id_check",
+          "value": "\"establishment_games\".\"game_id\" ~ '^[a-z][a-z0-9-]{1,31}$'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.establishment_modules": {
+      "name": "establishment_modules",
+      "schema": "",
+      "columns": {
+        "establishment_id": {
+          "name": "establishment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "module": {
+          "name": "module",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'active'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "establishment_modules_establishment_id_establishments_id_fk": {
+          "name": "establishment_modules_establishment_id_establishments_id_fk",
+          "tableFrom": "establishment_modules",
+          "tableTo": "establishments",
+          "columnsFrom": [
+            "establishment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "establishment_modules_establishment_id_module_pk": {
+          "name": "establishment_modules_establishment_id_module_pk",
+          "columns": [
+            "establishment_id",
+            "module"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "establishment_modules_module_check": {
+          "name": "establishment_modules_module_check",
+          "value": "\"establishment_modules\".\"module\" IN ('tapsy', 'tableo')"
+        },
+        "establishment_modules_status_check": {
+          "name": "establishment_modules_status_check",
+          "value": "\"establishment_modules\".\"status\" IN ('active', 'paused')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.establishments": {
+      "name": "establishments",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "timezone": {
+          "name": "timezone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Europe/Paris'"
+        },
+        "default_locale": {
+          "name": "default_locale",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'fr'"
+        },
+        "locales": {
+          "name": "locales",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{fr}'::text[]"
+        },
+        "brand_color": {
+          "name": "brand_color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "forced_theme": {
+          "name": "forced_theme",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "games_open_until": {
+          "name": "games_open_until",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "menu_version": {
+          "name": "menu_version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "establishments_organization_idx": {
+          "name": "establishments_organization_idx",
+          "columns": [
+            {
+              "expression": "organization_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "establishments_organization_id_organizations_id_fk": {
+          "name": "establishments_organization_id_organizations_id_fk",
+          "tableFrom": "establishments",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "establishments_slug_unique": {
+          "name": "establishments_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        },
+        "establishments_organization_id_uq": {
+          "name": "establishments_organization_id_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "organization_id",
+            "id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "establishments_slug_check": {
+          "name": "establishments_slug_check",
+          "value": "\"establishments\".\"slug\" ~ '^[a-z0-9-]{3,48}$'"
+        },
+        "establishments_locales_check": {
+          "name": "establishments_locales_check",
+          "value": "\"establishments\".\"locales\" <@ ARRAY['fr', 'en']::text[] AND \"establishments\".\"default_locale\" = ANY(\"establishments\".\"locales\")"
+        },
+        "establishments_brand_color_check": {
+          "name": "establishments_brand_color_check",
+          "value": "\"establishments\".\"brand_color\" IS NULL OR \"establishments\".\"brand_color\" ~ '^#[0-9a-f]{6}$'"
+        },
+        "establishments_theme_check": {
+          "name": "establishments_theme_check",
+          "value": "\"establishments\".\"forced_theme\" IS NULL OR \"establishments\".\"forced_theme\" IN ('light', 'dark')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.formula_step_items": {
+      "name": "formula_step_items",
+      "schema": "",
+      "columns": {
+        "establishment_id": {
+          "name": "establishment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "step_id": {
+          "name": "step_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "product_id": {
+          "name": "product_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "supplement_cents": {
+          "name": "supplement_cents",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "formula_step_items_establishment_id_establishments_id_fk": {
+          "name": "formula_step_items_establishment_id_establishments_id_fk",
+          "tableFrom": "formula_step_items",
+          "tableTo": "establishments",
+          "columnsFrom": [
+            "establishment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "formula_step_items_step_fk": {
+          "name": "formula_step_items_step_fk",
+          "tableFrom": "formula_step_items",
+          "tableTo": "formula_steps",
+          "columnsFrom": [
+            "establishment_id",
+            "step_id"
+          ],
+          "columnsTo": [
+            "establishment_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "formula_step_items_product_fk": {
+          "name": "formula_step_items_product_fk",
+          "tableFrom": "formula_step_items",
+          "tableTo": "products",
+          "columnsFrom": [
+            "establishment_id",
+            "product_id"
+          ],
+          "columnsTo": [
+            "establishment_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "formula_step_items_step_id_product_id_pk": {
+          "name": "formula_step_items_step_id_product_id_pk",
+          "columns": [
+            "step_id",
+            "product_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "formula_step_items_supplement_check": {
+          "name": "formula_step_items_supplement_check",
+          "value": "\"formula_step_items\".\"supplement_cents\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.formula_steps": {
+      "name": "formula_steps",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "establishment_id": {
+          "name": "establishment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "formula_id": {
+          "name": "formula_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "label": {
+          "name": "label",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "min_choices": {
+          "name": "min_choices",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "max_choices": {
+          "name": "max_choices",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "formula_steps_establishment_id_establishments_id_fk": {
+          "name": "formula_steps_establishment_id_establishments_id_fk",
+          "tableFrom": "formula_steps",
+          "tableTo": "establishments",
+          "columnsFrom": [
+            "establishment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "formula_steps_formula_fk": {
+          "name": "formula_steps_formula_fk",
+          "tableFrom": "formula_steps",
+          "tableTo": "formulas",
+          "columnsFrom": [
+            "establishment_id",
+            "formula_id"
+          ],
+          "columnsTo": [
+            "establishment_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "formula_steps_tenant_id_uq": {
+          "name": "formula_steps_tenant_id_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "establishment_id",
+            "id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "formula_steps_choices_check": {
+          "name": "formula_steps_choices_check",
+          "value": "\"formula_steps\".\"min_choices\" >= 0 AND \"formula_steps\".\"max_choices\" >= GREATEST(\"formula_steps\".\"min_choices\", 1)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.formulas": {
+      "name": "formulas",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "establishment_id": {
+          "name": "establishment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price_cents": {
+          "name": "price_cents",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_available": {
+          "name": "is_available",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "translations": {
+          "name": "translations",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "formulas_establishment_id_establishments_id_fk": {
+          "name": "formulas_establishment_id_establishments_id_fk",
+          "tableFrom": "formulas",
+          "tableTo": "establishments",
+          "columnsFrom": [
+            "establishment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "formulas_tenant_id_uq": {
+          "name": "formulas_tenant_id_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "establishment_id",
+            "id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "formulas_price_check": {
+          "name": "formulas_price_check",
+          "value": "\"formulas\".\"price_cents\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.game_content_packs": {
+      "name": "game_content_packs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "establishment_id": {
+          "name": "establishment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "game_id": {
+          "name": "game_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content": {
+          "name": "content",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content_version": {
+          "name": "content_version",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "is_published": {
+          "name": "is_published",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "game_content_packs_lookup_idx": {
+          "name": "game_content_packs_lookup_idx",
+          "columns": [
+            {
+              "expression": "game_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "establishment_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "game_content_packs_establishment_id_establishments_id_fk": {
+          "name": "game_content_packs_establishment_id_establishments_id_fk",
+          "tableFrom": "game_content_packs",
+          "tableTo": "establishments",
+          "columnsFrom": [
+            "establishment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "game_content_packs_id_check": {
+          "name": "game_content_packs_id_check",
+          "value": "\"game_content_packs\".\"game_id\" ~ '^[a-z][a-z0-9-]{1,31}$'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.game_hall_of_fame": {
+      "name": "game_hall_of_fame",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "establishment_id": {
+          "name": "establishment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "game_id": {
+          "name": "game_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "period": {
+          "name": "period",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "period_start": {
+          "name": "period_start",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pseudo": {
+          "name": "pseudo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "score": {
+          "name": "score",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "achieved_at": {
+          "name": "achieved_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "game_hall_of_fame_establishment_id_establishments_id_fk": {
+          "name": "game_hall_of_fame_establishment_id_establishments_id_fk",
+          "tableFrom": "game_hall_of_fame",
+          "tableTo": "establishments",
+          "columnsFrom": [
+            "establishment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "game_hall_of_fame_period_uq": {
+          "name": "game_hall_of_fame_period_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "establishment_id",
+            "game_id",
+            "period",
+            "period_start"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "game_hall_of_fame_period_check": {
+          "name": "game_hall_of_fame_period_check",
+          "value": "\"game_hall_of_fame\".\"period\" IN ('week', 'month')"
+        },
+        "game_hall_of_fame_pseudo_check": {
+          "name": "game_hall_of_fame_pseudo_check",
+          "value": "char_length(\"game_hall_of_fame\".\"pseudo\") BETWEEN 1 AND 20"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.game_sessions": {
+      "name": "game_sessions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "establishment_id": {
+          "name": "establishment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "game_id": {
+          "name": "game_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "game_version": {
+          "name": "game_version",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "room_kind": {
+          "name": "room_kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "table_id": {
+          "name": "table_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "ended_at": {
+          "name": "ended_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "player_count": {
+          "name": "player_count",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_reason": {
+          "name": "end_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "game_sessions_establishment_idx": {
+          "name": "game_sessions_establishment_idx",
+          "columns": [
+            {
+              "expression": "establishment_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "started_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "game_sessions_establishment_id_establishments_id_fk": {
+          "name": "game_sessions_establishment_id_establishments_id_fk",
+          "tableFrom": "game_sessions",
+          "tableTo": "establishments",
+          "columnsFrom": [
+            "establishment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "game_sessions_table_fk": {
+          "name": "game_sessions_table_fk",
+          "tableFrom": "game_sessions",
+          "tableTo": "dining_tables",
+          "columnsFrom": [
+            "establishment_id",
+            "table_id"
+          ],
+          "columnsTo": [
+            "establishment_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "game_sessions_room_check": {
+          "name": "game_sessions_room_check",
+          "value": "(\"game_sessions\".\"room_kind\" = 'table') = (\"game_sessions\".\"table_id\" IS NOT NULL)"
+        },
+        "game_sessions_players_check": {
+          "name": "game_sessions_players_check",
+          "value": "\"game_sessions\".\"player_count\" >= 1"
+        },
+        "game_sessions_end_check": {
+          "name": "game_sessions_end_check",
+          "value": "\"game_sessions\".\"end_reason\" IS NULL OR \"game_sessions\".\"end_reason\" IN ('finished', 'abandoned', 'server_restart')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.game_vouchers": {
+      "name": "game_vouchers",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "establishment_id": {
+          "name": "establishment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "game_id": {
+          "name": "game_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reward": {
+          "name": "reward",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "product_id": {
+          "name": "product_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "table_id": {
+          "name": "table_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "redeemed_at": {
+          "name": "redeemed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "game_vouchers_daily_idx": {
+          "name": "game_vouchers_daily_idx",
+          "columns": [
+            {
+              "expression": "establishment_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "game_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "game_vouchers_establishment_id_establishments_id_fk": {
+          "name": "game_vouchers_establishment_id_establishments_id_fk",
+          "tableFrom": "game_vouchers",
+          "tableTo": "establishments",
+          "columnsFrom": [
+            "establishment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "game_vouchers_code_uq": {
+          "name": "game_vouchers_code_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "establishment_id",
+            "code"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "game_vouchers_code_check": {
+          "name": "game_vouchers_code_check",
+          "value": "\"game_vouchers\".\"code\" ~ '^[A-HJ-NP-Z2-9]{6}$'"
+        },
+        "game_vouchers_expiry_check": {
+          "name": "game_vouchers_expiry_check",
+          "value": "\"game_vouchers\".\"expires_at\" > \"game_vouchers\".\"created_at\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.happy_hours": {
+      "name": "happy_hours",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "establishment_id": {
+          "name": "establishment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "label": {
+          "name": "label",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "weekdays": {
+          "name": "weekdays",
+          "type": "smallint[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "starts_at": {
+          "name": "starts_at",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ends_at": {
+          "name": "ends_at",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {
+        "happy_hours_establishment_idx": {
+          "name": "happy_hours_establishment_idx",
+          "columns": [
+            {
+              "expression": "establishment_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "happy_hours_establishment_id_establishments_id_fk": {
+          "name": "happy_hours_establishment_id_establishments_id_fk",
+          "tableFrom": "happy_hours",
+          "tableTo": "establishments",
+          "columnsFrom": [
+            "establishment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "happy_hours_weekdays_check": {
+          "name": "happy_hours_weekdays_check",
+          "value": "cardinality(\"happy_hours\".\"weekdays\") > 0 AND \"happy_hours\".\"weekdays\" <@ ARRAY[1, 2, 3, 4, 5, 6, 7]::smallint[]"
+        },
+        "happy_hours_range_check": {
+          "name": "happy_hours_range_check",
+          "value": "\"happy_hours\".\"starts_at\" <> \"happy_hours\".\"ends_at\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.member_establishments": {
+      "name": "member_establishments",
+      "schema": "",
+      "columns": {
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "establishment_id": {
+          "name": "establishment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "member_establishments_establishment_id_establishments_id_fk": {
+          "name": "member_establishments_establishment_id_establishments_id_fk",
+          "tableFrom": "member_establishments",
+          "tableTo": "establishments",
+          "columnsFrom": [
+            "establishment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "member_establishments_member_fk": {
+          "name": "member_establishments_member_fk",
+          "tableFrom": "member_establishments",
+          "tableTo": "organization_members",
+          "columnsFrom": [
+            "organization_id",
+            "user_id"
+          ],
+          "columnsTo": [
+            "organization_id",
+            "user_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "member_establishments_establishment_fk": {
+          "name": "member_establishments_establishment_fk",
+          "tableFrom": "member_establishments",
+          "tableTo": "establishments",
+          "columnsFrom": [
+            "organization_id",
+            "establishment_id"
+          ],
+          "columnsTo": [
+            "organization_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "member_establishments_organization_id_user_id_establishment_id_pk": {
+          "name": "member_establishments_organization_id_user_id_establishment_id_pk",
+          "columns": [
+            "organization_id",
+            "user_id",
+            "establishment_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.organization_members": {
+      "name": "organization_members",
+      "schema": "",
+      "columns": {
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "organization_members_user_idx": {
+          "name": "organization_members_user_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "organization_members_organization_id_organizations_id_fk": {
+          "name": "organization_members_organization_id_organizations_id_fk",
+          "tableFrom": "organization_members",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "organization_members_user_id_users_id_fk": {
+          "name": "organization_members_user_id_users_id_fk",
+          "tableFrom": "organization_members",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "organization_members_organization_id_user_id_pk": {
+          "name": "organization_members_organization_id_user_id_pk",
+          "columns": [
+            "organization_id",
+            "user_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "organization_members_role_check": {
+          "name": "organization_members_role_check",
+          "value": "\"organization_members\".\"role\" IN ('owner', 'manager', 'staff')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.organizations": {
+      "name": "organizations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.products": {
+      "name": "products",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "establishment_id": {
+          "name": "establishment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category_id": {
+          "name": "category_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price_cents": {
+          "name": "price_cents",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "happy_hour_price_cents": {
+          "name": "happy_hour_price_cents",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "abv": {
+          "name": "abv",
+          "type": "numeric(4, 1)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "allergens": {
+          "name": "allergens",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "may_contain": {
+          "name": "may_contain",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "diets": {
+          "name": "diets",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "details": {
+          "name": "details",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "image_key": {
+          "name": "image_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_available": {
+          "name": "is_available",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "is_visible": {
+          "name": "is_visible",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "board_date": {
+          "name": "board_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "translations": {
+          "name": "translations",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "products_menu_idx": {
+          "name": "products_menu_idx",
+          "columns": [
+            {
+              "expression": "establishment_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "category_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "position",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "products_establishment_id_establishments_id_fk": {
+          "name": "products_establishment_id_establishments_id_fk",
+          "tableFrom": "products",
+          "tableTo": "establishments",
+          "columnsFrom": [
+            "establishment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "products_category_fk": {
+          "name": "products_category_fk",
+          "tableFrom": "products",
+          "tableTo": "categories",
+          "columnsFrom": [
+            "establishment_id",
+            "category_id"
+          ],
+          "columnsTo": [
+            "establishment_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "products_tenant_id_uq": {
+          "name": "products_tenant_id_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "establishment_id",
+            "id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "products_kind_check": {
+          "name": "products_kind_check",
+          "value": "\"products\".\"kind\" IN ('drink', 'dish')"
+        },
+        "products_name_check": {
+          "name": "products_name_check",
+          "value": "jsonb_typeof(\"products\".\"name\") = 'object' AND \"products\".\"name\" <> '{}'::jsonb"
+        },
+        "products_price_check": {
+          "name": "products_price_check",
+          "value": "\"products\".\"price_cents\" >= 0 AND (\"products\".\"happy_hour_price_cents\" IS NULL OR \"products\".\"happy_hour_price_cents\" BETWEEN 0 AND \"products\".\"price_cents\")"
+        },
+        "products_abv_check": {
+          "name": "products_abv_check",
+          "value": "\"products\".\"abv\" IS NULL OR (\"products\".\"kind\" = 'drink' AND \"products\".\"abv\" BETWEEN 0 AND 100)"
+        },
+        "products_allergens_check": {
+          "name": "products_allergens_check",
+          "value": "\"products\".\"allergens\" <@ ARRAY['gluten', 'crustaces', 'oeufs', 'poissons', 'arachides', 'soja', 'lait', 'fruits_a_coque', 'celeri', 'moutarde', 'sesame', 'sulfites', 'lupin', 'mollusques']::text[] AND \"products\".\"may_contain\" <@ ARRAY['gluten', 'crustaces', 'oeufs', 'poissons', 'arachides', 'soja', 'lait', 'fruits_a_coque', 'celeri', 'moutarde', 'sesame', 'sulfites', 'lupin', 'mollusques']::text[]"
+        },
+        "products_diets_check": {
+          "name": "products_diets_check",
+          "value": "\"products\".\"diets\" <@ ARRAY['vegetarien', 'vegan']::text[]"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password_change_required": {
+          "name": "password_change_required",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "display_name": {
+          "name": "display_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email_verified_at": {
+          "name": "email_verified_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_active_at": {
+          "name": "last_active_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "users_email_lower_uq": {
+          "name": "users_email_lower_uq",
+          "columns": [
+            {
+              "expression": "lower(\"email\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

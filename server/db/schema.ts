@@ -26,9 +26,9 @@ import {
 } from 'drizzle-orm/pg-core';
 import { ALLERGENS, DIETS } from '../../shared/allergens.ts';
 import { LOCALES, type Localized, type TranslationStatus } from '../../shared/locales.ts';
+import { ROLES } from '../../shared/roles.ts';
 
 export const MODULES = ['tapsy', 'tableo'] as const;
-export const ROLES = ['owner', 'manager', 'staff'] as const; // staff : ruptures de stock et jeux, pas les prix
 
 export type DrinkDetails = { ibu?: number; volumeMl?: number; style?: string; tastingNotes?: Localized; origin?: string };
 export type DishDetails = { spicyLevel?: 0 | 1 | 2 | 3 };
@@ -52,6 +52,8 @@ export const users = pgTable(
     id: id(),
     email: text().notNull(),
     passwordHash: text().notNull(), // Argon2id
+    // mot de passe provisoire (compte créé par un script ou par un responsable) : à changer à la connexion
+    passwordChangeRequired: boolean().notNull().default(false),
     displayName: text().notNull(),
     emailVerifiedAt: stamp(),
     lastActiveAt: stamp(),
@@ -77,7 +79,7 @@ export const organizationMembers = pgTable(
     userId: uuid()
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    role: text({ enum: ROLES }).notNull(),
+    role: text({ enum: ROLES }).notNull(), // droits de chaque rôle : shared/roles.ts
     createdAt: stamp().notNull().defaultNow(),
   },
   (t) => [
@@ -99,7 +101,7 @@ export const establishments = pgTable(
     timezone: text().notNull().default('Europe/Paris'),
     defaultLocale: text({ enum: LOCALES }).notNull().default('fr'),
     locales: text().array().notNull().default(sql`'{fr}'::text[]`), // langues proposées aux clients
-    brandColor: text(), // contraste vérifié à l'enregistrement
+    brandColor: text(), // fond : texte noir ou blanc selon le contraste (shared/colors.ts)
     forcedTheme: text({ enum: ['light', 'dark'] }), // null = préférence du téléphone
     gamesOpenUntil: stamp(), // le personnel ouvre les jeux pour la soirée, ils se referment seuls
     menuVersion: integer().notNull().default(1), // ETag du menu public, +1 à chaque modification
@@ -108,6 +110,7 @@ export const establishments = pgTable(
   },
   (t) => [
     index('establishments_organization_idx').on(t.organizationId),
+    unique('establishments_organization_id_uq').on(t.organizationId, t.id), // cible de member_establishments
     check('establishments_slug_check', sql`${t.slug} ~ '^[a-z0-9-]{3,48}$'`),
     check('establishments_locales_check', sql`${t.locales} <@ ARRAY[${inList(LOCALES)}]::text[] AND ${t.defaultLocale} = ANY(${t.locales})`),
     check('establishments_brand_color_check', sql`${t.brandColor} IS NULL OR ${t.brandColor} ~ '^#[0-9a-f]{6}$'`),
@@ -133,6 +136,12 @@ export const memberEstablishments = pgTable(
       name: 'member_establishments_member_fk',
       columns: [t.organizationId, t.userId],
       foreignColumns: [organizationMembers.organizationId, organizationMembers.userId],
+    }).onDelete('cascade'),
+    // la base refuse d'ouvrir à un membre l'établissement d'une autre organisation
+    foreignKey({
+      name: 'member_establishments_establishment_fk',
+      columns: [t.organizationId, t.establishmentId],
+      foreignColumns: [establishments.organizationId, establishments.id],
     }).onDelete('cascade'),
   ],
 );

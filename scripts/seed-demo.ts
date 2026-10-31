@@ -1,7 +1,8 @@
 // Données de démonstration : « Le Comptoir Démo » (/jouer/demo-table-1), deux tables, quelques boissons,
-// Happy Hour toute la journée, jeux commerciaux activés. Rejouable : l'établissement est recréé.
+// Happy Hour toute la journée, jeux commerciaux activés, et trois comptes du back-office (un par rôle).
+// Rejouable : l'établissement et les comptes sont recréés.
 // Usage : node --env-file-if-exists=.env scripts/seed-demo.ts
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { db, pool } from '../server/db/client.ts';
 import { runMigrations } from '../server/db/migrate.ts';
 import {
@@ -11,14 +12,27 @@ import {
   establishmentModules,
   establishments,
   happyHours,
+  memberEstablishments,
+  organizationMembers,
   organizations,
   products,
+  users,
 } from '../server/db/schema.ts';
+import { hashPassword } from '../server/lib/passwords.ts';
 
 await runMigrations();
 
 const [existing] = await db.select({ organizationId: establishments.organizationId }).from(establishments).where(eq(establishments.slug, 'demo'));
 if (existing) await db.delete(organizations).where(eq(organizations.id, existing.organizationId)); // cascade
+
+// Mot de passe connu de tous : démonstration en local seulement
+const DEMO_PASSWORD = 'comptoir-demo';
+const DEMO_ACCOUNTS = [
+  { email: 'proprietaire@demo.menupulse.fr', displayName: 'Camille (propriétaire)', role: 'owner' },
+  { email: 'gerant@demo.menupulse.fr', displayName: 'Sam (gérant)', role: 'manager' },
+  { email: 'serveur@demo.menupulse.fr', displayName: 'Lou (serveur)', role: 'staff' },
+] as const;
+await db.delete(users).where(inArray(users.email, DEMO_ACCOUNTS.map((a) => a.email)));
 
 const [organization] = await db.insert(organizations).values({ name: 'Démo Menupulse' }).returning();
 const [venue] = await db
@@ -81,5 +95,18 @@ await db.insert(establishmentGames).values([
   { establishmentId, gameId: 'jackpot-happy-hour', isEnabled: true, settings: { winRate: 0.5, maxWinsPerDay: 20 } },
 ]);
 
+const passwordHash = await hashPassword(DEMO_PASSWORD);
+const accounts = await db
+  .insert(users)
+  .values(DEMO_ACCOUNTS.map(({ email, displayName }) => ({ email, displayName, passwordHash })))
+  .returning({ id: users.id, email: users.email });
+await db.insert(organizationMembers).values(
+  DEMO_ACCOUNTS.map(({ email, role }) => ({ organizationId: organization!.id, userId: accounts.find((a) => a.email === email)!.id, role })),
+);
+// le serveur n'a accès qu'à cet établissement (liste blanche)
+const staff = accounts.find((a) => a.email === 'serveur@demo.menupulse.fr')!;
+await db.insert(memberEstablishments).values({ organizationId: organization!.id, userId: staff.id, establishmentId });
+
 console.log('Démonstration prête : http://localhost:3100/jouer/demo-table-1');
+console.log(`Back-office : ${DEMO_ACCOUNTS.map((a) => a.email).join(', ')} — mot de passe « ${DEMO_PASSWORD} »`);
 await pool.end();

@@ -13,10 +13,11 @@
     "build": "npm run typecheck && vite build && node scripts/check-budget.ts",
     "typecheck": "tsc -p shared && tsc -p client && tsc -p client/src/sw && tsc -p server && tsc -p .",
     "lint": "eslint .",
-    "test": "node --test \"test/**/*.test.ts\"",
+    "test": "node --env-file-if-exists=.env --test \"test/**/*.test.ts\"",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --env-file-if-exists=.env server/db/migrate.ts",
-    "seed:demo": "node --env-file-if-exists=.env scripts/seed-demo.ts"
+    "seed:demo": "node --env-file-if-exists=.env scripts/seed-demo.ts",
+    "account:create": "node --env-file-if-exists=.env scripts/create-account.ts"
   },
   "dependencies": {
     "argon2": "^0.44.0",
