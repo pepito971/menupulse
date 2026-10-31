@@ -5,3 +5,5 @@ data/
 test/scratch/
 .lighthouseci/
 .claude/settings.local.json
+test-results/
+playwright-report/

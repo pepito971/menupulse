@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ci:
+    name: Lint, typage, build et tests (Node 22)
+    runs-on: ubuntu-latest
+
+    # Vraie base PostgreSQL 16 : les tests de l'API du back-office (test/back-office-api.test.ts)
+    # s'y connectent, appliquent les migrations et créent puis suppriment leurs propres données.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: menupulse
+          POSTGRES_PASSWORD: menupulse
+          POSTGRES_DB: menupulse_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U menupulse -d menupulse_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgres://menupulse:menupulse@localhost:5432/menupulse_test
+
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v7
+
+      - name: Node 22 (≥ 22.18 : exécute le TypeScript directement)
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Dépendances
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      # npm run build vérifie aussi les types, puis le budget de poids (bloquant)
+      - name: Typage, build et budget de poids
+        run: npm run build
+
+      - name: Migrations
+        run: npm run db:migrate
+
+      - name: Tests
+        run: npm test
+
+  security:
+    name: Audit des dépendances (npm audit)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v7
+
+      - name: Node 22
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Dépendances
+        run: npm ci
+
+      # échoue si une dépendance présente une vulnérabilité de sévérité haute ou critique
+      - name: npm audit
+        run: npm audit --audit-level=high

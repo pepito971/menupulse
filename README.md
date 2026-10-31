@@ -31,6 +31,7 @@ npm run dev            # http://localhost:3100 (Vite en middleware, migrations a
 | `npm run db:migrate` | applique les migrations |
 | `npm run seed:demo` | crée l'établissement de démonstration (jeux : http://localhost:3100/jouer/demo-table-1) et ses comptes du back-office (mot de passe `comptoir-demo`) |
 | `npm run account:create -- --email … --name "…" --organization "…"` | crée le compte d'un propriétaire et son organisation ; affiche un mot de passe provisoire |
+| `npx playwright install chromium` | une fois par machine : navigateur des vérifications d'écrans (`test/support/browser.ts`) |
 
 ## Arborescence
 

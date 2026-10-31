@@ -1,0 +1,20 @@
+version: 2
+updates:
+  # dépendances npm de l'application
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      # mises à jour mineures et correctives regroupées en une seule demande de fusion
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # versions des actions utilisées par les workflows GitHub
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
