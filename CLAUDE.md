@@ -71,5 +71,6 @@ Sept jeux au lancement : Quiz du Comptoir, Tu préfères ?, L'Intrus, Action ou 
 - `npm test` (tests `node:test` en TypeScript, `test/**/*.test.ts`), `npm run typecheck`, `npm run lint`, `npm run build` (inclut le budget de poids).
 - Port local par défaut **3100** (Planevo occupe le 3000 sur cette machine).
 - `npm run seed:demo` crée « Le Comptoir Démo » : jeux sur http://localhost:3100/jouer/demo-table-1 (Happy Hour toute la journée pour essayer le Jack-Pot).
+- **Base locale dédiée** (`menupulse`, rôle `menupulse` propriétaire, mot de passe aléatoire) créée par `scripts/create-local-db.ps1`, à lancer par l'utilisateur : il faut le mot de passe administrateur `postgres`, que Claude n'a pas. Jamais la base ni le rôle de Planevo (`geodesign`).
 - **Python sous Windows écrit des fins de ligne CRLF** (`open(..., 'w')`) : ouvrir avec `newline=''` pour garder les LF du dépôt.
 - **Piège des outils d'écriture** : une séquence d'échappement Unicode (barre oblique inverse, `u`, quatre chiffres hexadécimaux) écrite dans un fichier peut être décodée en vrai caractère (un séparateur de ligne a cassé une expression régulière). Construire ces caractères avec `String.fromCharCode` ou s'en passer.

@@ -12,6 +12,9 @@ Menus digitaux pour bars et restaurants : **Tapsy** (bar, jeux de table en temps
 ```sh
 npm install
 cp .env.example .env   # puis renseigner DATABASE_URL
+# ou, sous Windows avec PostgreSQL 16 installé : crée le rôle et la base « menupulse » et écrit DATABASE_URL
+powershell -ExecutionPolicy Bypass -File scripts/create-local-db.ps1
+npm run seed:demo      # établissement de démonstration
 npm run dev            # http://localhost:3100 (Vite en middleware, migrations appliquées au démarrage)
 ```
 
