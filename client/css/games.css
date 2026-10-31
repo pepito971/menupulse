@@ -1,0 +1,486 @@
+/* Jeux de table (Tapsy). Mobile d'abord : une colonne, boutons d'au moins 48 px (56 px pour les réponses),
+   texte lisible à bout de bras dans un bar sombre. Chargée avec l'application des jeux uniquement. */
+
+.game-app {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100dvh;
+  max-inline-size: 560px;
+  margin-inline: auto;
+  padding: var(--space-3) var(--space-4) calc(var(--space-6) + env(safe-area-inset-bottom));
+  gap: var(--space-3);
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.game-venue {
+  margin: 0;
+  font-weight: 700;
+  font-size: var(--text-lg);
+}
+
+.game-table,
+.game-footer {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.game-footer {
+  margin-block-start: auto;
+  text-align: center;
+}
+
+.game-root,
+.game-main,
+.game-area {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.game-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.game-title {
+  margin: 0;
+  font-size: var(--text-xl);
+  line-height: 1.2;
+}
+
+.game-label {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.game-sub,
+.game-step {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.game-notice,
+.game-loading {
+  margin: 0;
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--color-muted);
+}
+
+.game-error {
+  margin: 0;
+  color: var(--color-danger-text);
+  font-weight: 600;
+}
+
+.game-error:empty {
+  display: none;
+}
+
+.game-banner,
+.game-toast {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-align: center;
+}
+
+.game-banner {
+  background: var(--color-surface-2);
+  color: var(--color-warning-text);
+}
+
+.game-toast {
+  position: fixed;
+  inset-inline: var(--space-4);
+  inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom));
+  z-index: 10;
+  background: var(--color-text);
+  color: var(--color-bg);
+  box-shadow: var(--shadow-md);
+}
+
+.game-wide {
+  inline-size: 100%;
+}
+
+.game-leave {
+  border-style: dashed;
+}
+
+/* Formulaire pour rejoindre */
+.game-form .game-field,
+.game-check {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.game-check {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-block-size: var(--tap-min);
+}
+
+.game-check input {
+  inline-size: 24px;
+  block-size: 24px;
+  margin-block-start: 2px;
+  flex: none;
+  accent-color: var(--color-brand);
+}
+
+/* Salon */
+.game-list,
+.game-players,
+.scoreboard ol,
+.scoreboard-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.game-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.game-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+
+.game-item-text {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.game-item-name {
+  margin: 0;
+  font-weight: 700;
+}
+
+.game-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.game-player {
+  padding: var(--space-1) var(--space-3);
+  border-radius: 999px;
+  background: var(--color-surface-2);
+  font-size: var(--text-sm);
+}
+
+.game-player.is-you {
+  outline: 2px solid var(--color-brand-text);
+}
+
+.game-player.is-offline {
+  opacity: 0.55;
+}
+
+/* Minuteurs */
+.timer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.timer-track {
+  flex: 1;
+  block-size: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--color-surface-2);
+}
+
+.timer-fill {
+  block-size: 100%;
+  background: var(--color-brand);
+  transform-origin: left center;
+}
+
+.timer.is-urgent .timer-fill {
+  background: var(--color-danger);
+}
+
+.timer-label {
+  min-inline-size: 3ch;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.timer--text {
+  display: block;
+}
+
+/* Réponses, choix */
+.game-prompt {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.game-choices {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+}
+
+@media (min-width: 400px) {
+  .game-choices--grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.game-choice {
+  min-block-size: 56px;
+  padding: var(--space-3);
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.game-choice[aria-pressed='true'] {
+  border-color: var(--color-brand-text);
+  background: color-mix(in srgb, var(--color-brand) 18%, var(--color-surface));
+}
+
+.game-choice.is-correct {
+  border-color: var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 22%, var(--color-surface));
+}
+
+.game-choice.is-wrong {
+  border-color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 18%, var(--color-surface));
+}
+
+.game-choice:disabled {
+  cursor: default;
+}
+
+.game-choice:disabled:not(.is-correct, .is-wrong, [aria-pressed='true']) {
+  opacity: 0.6;
+}
+
+.game-feedback {
+  margin: 0;
+  font-weight: 700;
+  text-align: center;
+}
+
+.game-feedback.is-good {
+  color: var(--color-success-text);
+}
+
+.game-feedback.is-bad {
+  color: var(--color-danger-text);
+}
+
+.game-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.game-actions .ui-btn {
+  min-block-size: 64px;
+  font-size: var(--text-lg);
+}
+
+/* Tu préfères : barres de résultat */
+.vote-result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.vote-bar {
+  block-size: 12px;
+  border-radius: 999px;
+  background: var(--color-surface-2);
+  overflow: hidden;
+}
+
+.vote-bar span {
+  display: block;
+  block-size: 100%;
+  background: var(--color-brand);
+}
+
+/* Mot interdit */
+.taboo-word {
+  margin: 0;
+  font-size: 2.25rem;
+  font-weight: 800;
+  text-align: center;
+  word-break: break-word;
+}
+
+.taboo-forbidden {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.taboo-forbidden li {
+  padding: var(--space-1) var(--space-3);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-danger) 20%, var(--color-surface));
+  color: var(--color-danger-text);
+  font-weight: 700;
+  text-decoration: line-through;
+}
+
+.game-big-number {
+  margin: 0;
+  font-size: 3rem;
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Indices */
+.hint-list {
+  margin: 0;
+  padding-inline-start: 1.25em;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Bon à présenter au comptoir */
+.voucher {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 2px dashed var(--color-success);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.voucher-reward {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.voucher-code {
+  margin: 0;
+  font-family: ui-monospace, 'Cascadia Mono', Menlo, monospace;
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+/* Classement */
+.scoreboard,
+.scoreboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.scoreboard ol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.scoreboard li,
+.scoreboard-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+}
+
+.scoreboard li.is-you {
+  outline: 2px solid var(--color-brand-text);
+}
+
+.scoreboard-score {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+/* Jack-pot */
+.reels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.reel {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  font-size: 2.75rem;
+  overflow: hidden;
+}
+
+.reels.is-spinning .reel span {
+  animation: reel-spin 0.12s linear infinite;
+}
+
+.reels.is-spinning .reel:nth-child(2) span {
+  animation-duration: 0.15s;
+}
+
+.reels.is-spinning .reel:nth-child(3) span {
+  animation-duration: 0.18s;
+}
+
+@keyframes reel-spin {
+  from {
+    transform: translateY(-40%);
+    filter: blur(1px);
+  }
+  to {
+    transform: translateY(40%);
+    filter: blur(1px);
+  }
+}

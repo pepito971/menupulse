@@ -426,3 +426,30 @@ export const gameHallOfFame = pgTable(
     check('game_hall_of_fame_pseudo_check', sql`char_length(${t.pseudo}) BETWEEN 1 AND 20`),
   ],
 );
+
+/**
+ * Bons gagnés aux jeux (Boisson Mystère, Jack-Pot). Le code s'affiche sur le téléphone, mais il n'a de
+ * valeur que vérifié ici par le personnel : une capture d'écran réutilisée ou inventée est refusée
+ * (redeemed_at, expires_at). Codes sans 0/O ni 1/I, uniques par établissement.
+ */
+export const gameVouchers = pgTable(
+  'game_vouchers',
+  {
+    id: id(),
+    establishmentId: tenant(),
+    gameId: text().notNull(),
+    code: text().notNull(),
+    reward: localizedText().notNull(),
+    productId: uuid(), // Boisson Mystère : le produit concerné (sans clé étrangère : le bon survit à la carte)
+    tableId: uuid(),
+    createdAt: stamp().notNull().defaultNow(),
+    expiresAt: stamp().notNull(),
+    redeemedAt: stamp(),
+  },
+  (t) => [
+    unique('game_vouchers_code_uq').on(t.establishmentId, t.code),
+    index('game_vouchers_daily_idx').on(t.establishmentId, t.gameId, t.createdAt),
+    check('game_vouchers_code_check', sql`${t.code} ~ '^[A-HJ-NP-Z2-9]{6}$'`),
+    check('game_vouchers_expiry_check', sql`${t.expiresAt} > ${t.createdAt}`),
+  ],
+);

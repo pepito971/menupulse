@@ -9,6 +9,8 @@ export interface AppOptions {
   isProduction: boolean;
   sessionSecret: string;
   allowedOrigins: readonly string[];
+  /** Routes /api/* propres à chaque domaine, montées avant la réponse « route inconnue ». */
+  mountApi?: (app: Express) => void;
 }
 
 export function createApp(options: AppOptions): Express {
@@ -61,6 +63,8 @@ export function createApp(options: AppOptions): Express {
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true });
   });
+
+  options.mountApi?.(app);
 
   app.use('/api', (_req, res) => {
     res.status(404).json({ error: 'Route inconnue.' });

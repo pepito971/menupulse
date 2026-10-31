@@ -26,6 +26,7 @@ npm run dev            # http://localhost:3100 (Vite en middleware, migrations a
 | `npm run lint` | ESLint |
 | `npm run db:generate` | génère une migration à partir de `server/db/schema.ts` |
 | `npm run db:migrate` | applique les migrations |
+| `npm run seed:demo` | crée l'établissement de démonstration (jeux : http://localhost:3100/jouer/demo-table-1) |
 
 ## Arborescence
 
@@ -36,5 +37,9 @@ server/          Express 5 : app.ts, index.ts, db/ (schéma, migrations), lib/, 
 scripts/         contrôle du budget, données de démonstration
 test/            tests node:test
 ```
+
+## Jeux de table (Tapsy)
+
+Sept jeux synchronisés en temps réel (WebSocket `/ws`), sans compte joueur : Quiz du Comptoir, Tu préfères ?, L'Intrus, Action ou Vérité, Le Mot Interdit, La Boisson Mystère, Le Jack-Pot de l'Happy Hour. Ajouter un jeu : ses règles dans `server/games/<id>/` (inscrites dans `server/games/registry.ts`) et son composant dans `client/src/games/<id>/client.ts` — le moteur ne change pas.
 
 Conventions et décisions : voir [CLAUDE.md](CLAUDE.md).

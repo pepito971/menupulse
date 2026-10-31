@@ -15,7 +15,8 @@
     "lint": "eslint .",
     "test": "node --test \"test/**/*.test.ts\"",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "node --env-file-if-exists=.env server/db/migrate.ts"
+    "db:migrate": "node --env-file-if-exists=.env server/db/migrate.ts",
+    "seed:demo": "node --env-file-if-exists=.env scripts/seed-demo.ts"
   },
   "dependencies": {
     "argon2": "^0.44.0",
