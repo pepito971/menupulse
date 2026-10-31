@@ -1,0 +1,17 @@
+{
+  "ci": {
+    "collect": {
+      "startServerCommand": "npm start",
+      "url": ["http://localhost:3100/c/demo/fr"],
+      "numberOfRuns": 5,
+      "settings": { "preset": "desktop" }
+    },
+    "assert": {
+      "assertions": {
+        "largest-contentful-paint": ["error", { "maxNumericValue": 1000, "aggregationMethod": "median-run" }],
+        "cumulative-layout-shift": ["error", { "maxNumericValue": 0 }],
+        "total-blocking-time": ["error", { "maxNumericValue": 100 }]
+      }
+    }
+  }
+}

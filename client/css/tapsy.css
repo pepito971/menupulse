@@ -1,0 +1,11 @@
+/* Tapsy (bar) : festif, sombre par défaut — sauf si l'établissement impose le thème clair. */
+@import './theme.css';
+
+:root:not([data-theme='light']) {
+  color-scheme: dark;
+}
+
+:root {
+  --color-brand: #c2410c;
+  --color-brand-text: light-dark(#9a3412, #fdba74);
+}

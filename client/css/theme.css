@@ -1,0 +1,143 @@
+/* Système de design commun à Tapsy et Tableo. Mode sombre natif : light-dark() + color-scheme, sans
+   script (aucun flash au chargement). Le serveur pose data-theme quand l'établissement impose un thème,
+   et une couleur de marque (--color-brand) propre à l'établissement. Jamais de couleur en dur ailleurs. */
+:root {
+  color-scheme: light dark;
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+
+  --color-bg: light-dark(#f8fafc, #0b1120);
+  --color-surface: light-dark(#ffffff, #131c2e);
+  --color-surface-2: light-dark(#f1f5f9, #1b2740);
+  --color-text: light-dark(#0f172a, #e5e7eb);
+  --color-muted: light-dark(#475569, #9ca3af);
+  --color-border: light-dark(#e2e8f0, #263349);
+  --color-border-strong: light-dark(#94a3b8, #4b5b78);
+
+  /* accent : --color-brand pour les FONDS à texte blanc, --color-brand-text pour le texte sur panneau */
+  --color-brand: #1f6feb;
+  --color-brand-text: light-dark(#1a5fcc, #93c5fd);
+  --color-success: light-dark(#15803d, #22c55e);
+  --color-success-text: light-dark(#166534, #86efac);
+  --color-danger: light-dark(#b91c1c, #ef4444);
+  --color-danger-text: light-dark(#991b1b, #fca5a5);
+  --color-warning-text: light-dark(#92400e, #fcd34d);
+  --color-on-brand: #ffffff;
+
+  --tap-min: 48px; /* zone tactile minimale */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.75rem;
+  --shadow-md: 0 4px 16px color-mix(in srgb, var(--color-text) 12%, transparent);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  line-height: 1.45;
+  background: var(--color-bg);
+  color: var(--color-text);
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+.page {
+  max-inline-size: 640px;
+  margin-inline: auto;
+  padding: var(--space-4);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.ui-sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.ui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-block-size: var(--tap-min);
+  min-inline-size: var(--tap-min);
+  padding-inline: var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation; /* pas de délai ni de zoom au double appui */
+}
+
+.ui-btn--primary {
+  border-color: transparent;
+  background: var(--color-brand);
+  color: var(--color-on-brand);
+}
+
+.ui-btn:disabled,
+.ui-btn[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ui-input {
+  min-block-size: var(--tap-min);
+  inline-size: 100%;
+  padding-inline: var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-brand-text);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
