@@ -165,6 +165,14 @@ export const dbGameStore: GameStore = {
     }
   },
 
+  async loadHallOfFame(establishmentId, period, periodStart) {
+    return db
+      .select({ gameId: gameHallOfFame.gameId, pseudo: gameHallOfFame.pseudo, score: gameHallOfFame.score })
+      .from(gameHallOfFame)
+      .where(and(eq(gameHallOfFame.establishmentId, establishmentId), eq(gameHallOfFame.period, period), eq(gameHallOfFame.periodStart, periodStart)))
+      .orderBy(desc(gameHallOfFame.score));
+  },
+
   async closeInterruptedSessions() {
     const rows = await db
       .update(gameSessions)

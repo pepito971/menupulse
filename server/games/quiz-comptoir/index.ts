@@ -78,6 +78,7 @@ export const quizComptoir: GameDefinition<Settings, Content, State, Action, Quiz
   contentSchema,
   defaultContent: QUIZ_CONTENT,
   actionSchema,
+  facts: (settings) => ({ rounds: settings.questionCount, roundSeconds: settings.questionSeconds, maxPoints: settings.questionCount * 200 }),
 
   setup({ settings, content, players, rules }) {
     const picked = shuffle(content.questions, rules.random).slice(0, settings.questionCount);

@@ -61,6 +61,8 @@ export class Room {
   readonly seats = new Map<string, Seat>();
   game: RunningGame | null = null;
   lastResult: FinishedGame | null = null;
+  /** Points cumulés de la soirée, par joueur (gardés après son départ : la table reste une équipe). */
+  readonly standings = new Map<string, { pseudo: string; score: number; games: number }>();
 
   readonly #scheduler: Scheduler;
   readonly #random: (maxExclusive: number) => number;
@@ -254,7 +256,15 @@ export class Room {
     if (this.game !== game) return;
     this.#clearTimers(game);
     this.game = null;
-    if (result) this.lastResult = { gameId: game.definition.id, result, pseudos: new Map(game.players.map((p) => [p.id, p.pseudo])) };
+    if (result) {
+      this.lastResult = { gameId: game.definition.id, result, pseudos: new Map(game.players.map((p) => [p.id, p.pseudo])) };
+      for (const player of game.players) {
+        const line = this.standings.get(player.id) ?? { pseudo: player.pseudo, score: 0, games: 0 };
+        line.games += 1;
+        line.score += result.ranking.find((entry) => entry.playerId === player.id)?.score ?? 0;
+        this.standings.set(player.id, line);
+      }
+    }
     this.#hooks.gameEnded(this, game, result, reason);
     for (const [id, seat] of this.seats) {
       if (!seat.connected && seat.expired) this.seats.delete(id);

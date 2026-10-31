@@ -7,7 +7,8 @@ import type { ClientMessage, ErrorCode, LobbyGame, RoomView, ServerMessage } fro
 import type { AnyGameDefinition } from '../../shared/games/types.ts';
 import { isHappyHourActive } from '../../shared/happy-hour.ts';
 import type { Locale } from '../../shared/locales.ts';
-import { localDay } from '../../shared/periods.ts';
+import { TEAM_NAMES, teamNameIndex } from '../../shared/games/team-names.ts';
+import { localDay, periodStarts } from '../../shared/periods.ts';
 import { loadGameContent } from './content-loaders.ts';
 import { Room, systemScheduler, type Scheduler } from './engine/room.ts';
 import { text } from './helpers.ts';
@@ -34,6 +35,7 @@ interface Entry {
   consents: Map<string, boolean>;
   sessionId: Promise<string | null> | null;
   starting: boolean;
+  hallOfFame: { gameId: string; pseudo: string; score: number }[];
 }
 
 export class GameRooms {
@@ -119,9 +121,10 @@ export class GameRooms {
     let creating = this.#creating.get(table.tableId);
     if (!creating) {
       creating = this.#store.loadConfig(table.establishmentId).then((config) => {
-        const entry: Entry = { room: undefined as unknown as Room, table, config, sockets: new Map(), consents: new Map(), sessionId: null, starting: false };
+        const entry: Entry = { room: undefined as unknown as Room, table, config, sockets: new Map(), consents: new Map(), sessionId: null, starting: false, hallOfFame: [] };
         entry.room = this.#createRoom(entry);
         this.#entries.set(table.tableId, entry);
+        void this.#refreshHallOfFame(entry);
         return entry;
       });
       this.#creating.set(table.tableId, creating);
@@ -163,12 +166,24 @@ export class GameRooms {
           if (game.definition.ranked && best && best.score > 0 && pseudo && entry.consents.get(best.playerId)) {
             this.#store
               .recordHallOfFame({ establishmentId: entry.table.establishmentId, gameId: game.definition.id, pseudo, score: best.score, timezone: entry.config.timezone, now: new Date(this.#scheduler.now()) })
+              .then(() => this.#refreshHallOfFame(entry))
               .catch((error: unknown) => console.error('[jeux] tableau d’honneur non enregistré', error));
           }
         },
         emptied: () => this.#destroy(entry),
       },
     });
+  }
+
+  /** Records du mois, relus à l'ouverture de la table et après chaque nouveau record. */
+  async #refreshHallOfFame(entry: Entry): Promise<void> {
+    try {
+      const month = periodStarts(new Date(this.#scheduler.now()), entry.config.timezone).month;
+      entry.hallOfFame = await this.#store.loadHallOfFame(entry.table.establishmentId, 'month', month);
+      if (this.#entries.get(entry.table.tableId) === entry) this.#publish(entry);
+    } catch (error) {
+      console.error('[jeux] tableau d’honneur illisible', error);
+    }
   }
 
   #destroy(entry: Entry): void {
@@ -261,6 +276,7 @@ export class GameRooms {
         minPlayers: definition.players.min,
         maxPlayers: definition.players.max,
         available,
+        facts: definition.facts?.(this.#settings(entry, definition)),
       });
     }
     return games;
@@ -278,6 +294,17 @@ export class GameRooms {
       locale,
       tableLabel: entry.table.label,
       players: [...entry.room.seats.values()].map((s) => ({ id: s.player.id, pseudo: s.player.pseudo, connected: s.connected })),
+      team: {
+        name: text(TEAM_NAMES[teamNameIndex(entry.table.tableId, this.#today(entry))]!, locale),
+        points: [...entry.room.standings.values()].reduce((sum, line) => sum + line.score, 0),
+      },
+      standings: [...entry.room.standings]
+        .map(([id, line]) => ({ pseudo: line.pseudo, score: line.score, games: line.games, you: id === playerId }))
+        .sort((a, b) => b.score - a.score),
+      hallOfFame: entry.hallOfFame.flatMap((record) => {
+        const definition = this.#definitions.get(record.gameId);
+        return definition ? [{ gameId: record.gameId, game: text(definition.name, locale), pseudo: record.pseudo, score: record.score }] : [];
+      }),
       games: this.#lobbyGames(entry, locale),
       current: game ? { gameId: game.definition.id, rev: game.rev, view: entry.room.gameView(playerId) } : null,
       lastResult: last

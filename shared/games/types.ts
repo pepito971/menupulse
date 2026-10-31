@@ -57,6 +57,12 @@ export interface AvailabilityContext {
   happyHourActive: boolean;
 }
 
+export interface LobbyFacts {
+  rounds?: number;
+  roundSeconds?: number;
+  maxPoints?: number;
+}
+
 /** Validation d'une entrée inconnue (un schéma Zod convient tel quel). */
 export interface Schema<T> {
   safeParse(input: unknown): { success: true; data: T } | { success: false };
@@ -77,6 +83,8 @@ export interface GameDefinition<Settings, Content, State, Action, View> {
   defaultContent?: unknown; // contenu fourni par Menupulse quand l'établissement n'a pas de pack
   actionSchema: Schema<Action>; // chaque message d'un joueur est validé par le jeu lui-même
   isAvailable?(context: AvailabilityContext): boolean;
+  /** Repères affichés sur la carte du jeu dans le salon (nombre de questions, points possibles…). */
+  facts?(settings: Settings): LobbyFacts;
   setup(ctx: SetupContext<Settings, Content>): State;
   onAction(state: State, player: PlayerRef, action: Action, ctx: RuleContext): State;
   onTimer?(state: State, timerId: string, ctx: RuleContext): State;

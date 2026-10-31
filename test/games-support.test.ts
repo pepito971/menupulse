@@ -5,6 +5,7 @@ import { GAMES } from '../server/games/registry.ts';
 import { checkPseudo } from '../server/lib/pseudo.ts';
 import { parseClientMessage } from '../server/games/engine/protocol.ts';
 import { localDay, periodStarts } from '../shared/periods.ts';
+import { TEAM_NAMES, teamNameIndex } from '../shared/games/team-names.ts';
 
 const CLIENT_GAMES = new URL('../client/src/games/', import.meta.url);
 
@@ -45,4 +46,13 @@ test('périodes du tableau d’honneur à l’heure de l’établissement', () =
   assert.deepEqual(periodStarts(new Date('2026-07-03T12:00:00Z'), 'Europe/Paris'), { week: '2026-06-29', month: '2026-07-01' });
   assert.deepEqual(periodStarts(new Date('2026-07-05T12:00:00Z'), 'Europe/Paris'), { week: '2026-06-29', month: '2026-07-01' }); // dimanche
   assert.deepEqual(periodStarts(new Date('2026-07-06T12:00:00Z'), 'Europe/Paris'), { week: '2026-07-06', month: '2026-07-01' }); // lundi
+});
+
+test('le nom d’équipe est stable pour une table et un jour, et change avec eux', () => {
+  const index = teamNameIndex('table-a', '2026-10-31');
+  assert.equal(teamNameIndex('table-a', '2026-10-31'), index);
+  assert.ok(index >= 0 && index < TEAM_NAMES.length);
+  const spread = new Set(Array.from({ length: 40 }, (_, i) => teamNameIndex(`table-${i}`, '2026-10-31')));
+  assert.ok(spread.size > TEAM_NAMES.length / 2, 'les tables d’une même soirée ont des noms variés');
+  for (const name of TEAM_NAMES) assert.ok(name.fr && name.en, 'chaque nom existe en français et en anglais');
 });

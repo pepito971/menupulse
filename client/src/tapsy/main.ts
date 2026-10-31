@@ -4,7 +4,7 @@ import { registerServiceWorker } from '../core/sw-register.ts';
 registerServiceWorker();
 
 // Page des jeux d'une table : l'application des jeux n'est chargée que là (fichier séparé).
-const data = readPageData<{ screen?: string; table?: string; tableLabel?: string }>();
+const data = readPageData<{ screen?: string; table?: string; tableLabel?: string; venue?: string }>();
 const root = document.getElementById('game-root');
 if (data.screen === 'game' && data.table && root) {
   const { table, tableLabel = '' } = data;

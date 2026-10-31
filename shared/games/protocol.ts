@@ -1,6 +1,7 @@
 // Messages échangés sur le WebSocket des jeux (/ws). Types seulement : le serveur valide les messages
 // reçus avec Zod (server/games/engine/protocol.ts), le navigateur importe ces types sans rien embarquer.
 import type { Locale } from '../locales.ts';
+import type { LobbyFacts } from './types.ts';
 
 export type ClientMessage =
   | { t: 'hello'; token: string } // premier message obligatoire : rattache la connexion à une place
@@ -34,6 +35,7 @@ export interface LobbyGame {
   minPlayers: number;
   maxPlayers: number;
   available: boolean; // false : hors Happy Hour, déjà joué aujourd'hui…
+  facts?: LobbyFacts;
 }
 
 export interface RoomVoucher {
@@ -48,6 +50,12 @@ export interface RoomView {
   locale: Locale;
   tableLabel: string;
   players: { id: string; pseudo: string; connected: boolean }[];
+  /** La table forme une équipe pour la soirée : nom tiré au sort, points cumulés de tous ses joueurs. */
+  team: { name: string; points: number };
+  /** Classement de la soirée à cette table (points cumulés, joueurs partis compris). */
+  standings: { pseudo: string; score: number; games: number; you: boolean }[];
+  /** Records du mois dans l'établissement (seulement les joueurs qui l'ont accepté). */
+  hallOfFame: { gameId: string; game: string; pseudo: string; score: number }[];
   games: LobbyGame[];
   /** Jeu en cours : `view` est propre au jeu (voir client/src/games/<id>/). */
   current: { gameId: string; rev: number; view: unknown } | null;

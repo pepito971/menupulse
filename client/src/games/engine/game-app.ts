@@ -3,16 +3,16 @@
 //
 // Reprise automatique : le jeton de place est gardé dans sessionStorage (propre à l'onglet). Au
 // rechargement de la page, ou après une coupure, le joueur retrouve sa place sans retaper son pseudo.
-import type { ErrorCode, LobbyGame, RoomView } from '../../../../shared/games/protocol.ts';
+import type { ErrorCode, RoomView } from '../../../../shared/games/protocol.ts';
 import type { Locale } from '../../../../shared/locales.ts';
 import type { Dict } from '../../../../shared/i18n/translate.ts';
 import { createTranslator, type Translator } from '../../core/page-data.ts';
 import { setSecondsLabel } from './clock.ts';
 import { GameConnection, type EndReason } from './connection.ts';
-import { button, h } from './dom.ts';
+import { h } from './dom.ts';
 import { loadGameComponent } from './registry.ts';
 import type { GameComponent } from './types.ts';
-import { voucherCard } from './widgets.ts';
+import { hero, renderLobby, type LobbyTab } from './lobby.ts';
 import '../../../css/games.css';
 
 export interface GamePageData {
@@ -20,9 +20,12 @@ export interface GamePageData {
   messages: Dict;
   table: string;
   tableLabel: string;
+  venue?: string;
 }
 
 const MAX_PLAYERS = 10;
+const TAB_KEY = 'menupulse.tab';
+const TABS: readonly LobbyTab[] = ['play', 'ranking', 'team'];
 const END_MESSAGES: Record<EndReason, 'game.seatLost' | 'game.replaced' | 'game.tableClosed' | null> = {
   seat_lost: 'game.seatLost',
   replaced: 'game.replaced',
@@ -47,6 +50,7 @@ class GameApp {
   #component: { gameId: string; instance: GameComponent; area: HTMLElement } | null = null;
   #loadingGame: string | null = null;
   #toastTimer: ReturnType<typeof setTimeout> | null = null;
+  #tab: LobbyTab = TABS.find((tab) => tab === sessionStorage.getItem(TAB_KEY)) ?? 'play';
 
   constructor(root: HTMLElement, data: GamePageData) {
     this.#root = root;
@@ -71,11 +75,11 @@ class GameApp {
     const error = h('p', { class: 'game-error', role: 'alert' }, message ?? '');
     const pseudo = h('input', { class: 'ui-input', name: 'pseudo', autocomplete: 'nickname', maxlength: 20, minlength: 2, required: true, enterkeyhint: 'go', value: sessionStorage.getItem('menupulse.pseudo') ?? '' });
     const consent = h('input', { type: 'checkbox', name: 'consent' }); // décoché par défaut : accord explicite
-    const submit = h('button', { type: 'submit', class: 'ui-btn ui-btn--primary game-wide' }, t('game.join'));
+    const submit = h('button', { type: 'submit', class: 'tp-cta game-wide' }, t('game.join'));
     const form = h(
       'form',
-      { class: 'game-card game-form', novalidate: true },
-      h('h1', { class: 'game-title' }, t('game.joinTitle')),
+      { class: 'tp-panel game-form', novalidate: true },
+      h('h2', { class: 'tp-panel-title' }, t('game.joinTitle')),
       h('label', { class: 'game-field' }, h('span', { class: 'game-label' }, t('game.pseudo')), pseudo, h('span', { class: 'game-sub' }, t('game.pseudoHint'))),
       h('label', { class: 'game-check' }, consent, h('span', {}, t('game.hallOfFameConsent'), h('span', { class: 'game-sub' }, ` ${t('game.hallOfFameHint')}`))),
       error,
@@ -93,7 +97,7 @@ class GameApp {
         pseudo.focus();
       });
     });
-    this.#main.replaceChildren(form);
+    this.#main.replaceChildren(hero(t('game.joinEyebrow'), t('game.heroTitle'), t('game.heroSub')), form);
   }
 
   async #join(pseudo: string, hallOfFameConsent: boolean): Promise<string | null> {
@@ -153,7 +157,7 @@ class GameApp {
     if (current.view === null) {
       // arrivé pendant la partie : il regarde la table et jouera à la suivante
       this.#unmountGame();
-      this.#main.replaceChildren(h('section', { class: 'game-card' }, h('p', { class: 'game-notice' }, this.#t('game.inProgress'))), this.#playersCard(view));
+      this.#main.replaceChildren(h('section', { class: 'tp-panel' }, h('p', { class: 'game-notice' }, this.#t('game.inProgress'))));
       return;
     }
     if (this.#component?.gameId !== current.gameId) {
@@ -189,78 +193,29 @@ class GameApp {
 
   #renderLobby(view: RoomView): void {
     this.#unmountGame();
-    const t = this.#t;
-    const sections: Node[] = [];
-    if (view.lastResult) sections.push(this.#lastResultCard(view));
-    sections.push(
-      h(
-        'section',
-        { class: 'game-card' },
-        h('h1', { class: 'game-title' }, t('game.lobbyTitle')),
-        view.games.length === 0 ? h('p', { class: 'game-notice' }, t('game.noGames')) : h('ul', { class: 'game-list' }, view.games.map((game) => this.#gameItem(game, view))),
-      ),
-      this.#playersCard(view),
-      button(t('game.leave'), () => this.#leave(), { class: 'ui-btn game-wide game-leave' }),
-    );
-    this.#main.replaceChildren(...sections);
-  }
-
-  #gameItem(game: LobbyGame, view: RoomView): HTMLElement {
-    const t = this.#t;
-    const connected = view.players.filter((p) => p.connected).length;
-    const enoughPlayers = connected >= game.minPlayers;
-    const reason = !game.available ? t('game.unavailable') : !enoughPlayers ? t('game.minPlayers', { min: game.minPlayers }) : null;
-    return h(
-      'li',
-      { class: 'game-item' },
-      h('div', { class: 'game-item-text' }, h('p', { class: 'game-item-name' }, game.name), h('p', { class: 'game-sub' }, reason ?? game.tagline)),
-      button(t('game.play'), () => this.#connection?.send({ t: 'start', gameId: game.id }), {
-        class: 'ui-btn ui-btn--primary',
-        disabled: !game.available || !enoughPlayers,
-        'aria-label': `${t('game.play')} : ${game.name}`,
+    this.#main.replaceChildren(
+      ...renderLobby({
+        t: this.#t,
+        locale: view.locale,
+        venue: this.#data.venue ?? '',
+        view,
+        tab: this.#tab,
+        maxPlayers: MAX_PLAYERS,
+        setTab: (tab) => this.#setTab(tab),
+        start: (gameId) => this.#connection?.send({ t: 'start', gameId }),
+        leave: () => this.#leave(),
       }),
     );
   }
 
-  #playersCard(view: RoomView): HTMLElement {
-    const t = this.#t;
-    return h(
-      'section',
-      { class: 'game-card' },
-      h('h2', { class: 'game-label' }, t('game.playersTitle', { count: view.players.length, max: MAX_PLAYERS })),
-      h(
-        'ul',
-        { class: 'game-players' },
-        view.players.map((player) =>
-          h(
-            'li',
-            { class: ['game-player', player.id === view.you ? 'is-you' : '', player.connected ? '' : 'is-offline'].filter(Boolean).join(' ') },
-            player.pseudo,
-            player.id === view.you ? ` (${t('game.you')})` : '',
-            player.connected ? '' : ` · ${t('game.offline')}`,
-          ),
-        ),
-      ),
-    );
-  }
-
-  #lastResultCard(view: RoomView): HTMLElement {
-    const t = this.#t;
-    const result = view.lastResult!;
-    const name = view.games.find((game) => game.id === result.gameId)?.name ?? '';
-    return h(
-      'section',
-      { class: 'game-card' },
-      h('h2', { class: 'game-label' }, `${t('game.lastResult')}${name ? ` · ${name}` : ''}`),
-      result.vouchers.map((voucher) => voucherCard(voucher, t, view.locale)),
-      result.ranking.length > 0
-        ? h(
-            'ol',
-            { class: 'scoreboard-list' },
-            result.ranking.map((line) => h('li', {}, h('span', { class: 'scoreboard-name' }, line.pseudo), h('span', { class: 'scoreboard-score' }, t('game.points', { points: line.score })))),
-          )
-        : null,
-    );
+  #setTab(tab: LobbyTab): void {
+    this.#tab = tab;
+    sessionStorage.setItem(TAB_KEY, tab);
+    if (this.#room && !this.#room.current) {
+      this.#renderLobby(this.#room);
+      window.scrollTo({ top: 0 });
+      this.#main.querySelector<HTMLElement>('.tp-nav [aria-current="page"]')?.focus();
+    }
   }
 
   // ─── Messages ────────────────────────────────────────────────────────────────────

@@ -34,6 +34,8 @@ export interface GameStore {
   sessionEnded(sessionId: string, playerCount: number, reason: 'finished' | 'abandoned'): Promise<void>;
   saveVoucher(input: { establishmentId: string; tableId: string; gameId: string; voucher: VoucherEffect }): Promise<void>;
   recordHallOfFame(input: { establishmentId: string; gameId: string; pseudo: string; score: number; timezone: string; now: Date }): Promise<void>;
+  /** Records d'une période (meilleur pseudo par jeu). */
+  loadHallOfFame(establishmentId: string, period: 'week' | 'month', periodStart: string): Promise<{ gameId: string; pseudo: string; score: number }[]>;
   /** Au démarrage : les parties restées ouvertes ont été interrompues par l'arrêt du serveur. */
   closeInterruptedSessions(): Promise<number>;
 }

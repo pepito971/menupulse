@@ -15,7 +15,7 @@ import { dbGameStore } from './games/db-store.ts';
 import { attachGameSocket } from './games/engine/hub.ts';
 import { GameRooms } from './games/game-rooms.ts';
 import { GAMES_BY_ID } from './games/registry.ts';
-import { html } from './lib/html.ts';
+import { html, raw } from './lib/html.ts';
 import { createPageRenderer } from './lib/pages.ts';
 import { createPlayRouter } from './routes/play.ts';
 
@@ -74,6 +74,12 @@ if (useVite) {
 const renderPage = createPageRenderer({ clientDir, distDir, vite });
 
 // Jeux d'une table (QR code de la table). La langue est dans l'URL : sans elle, celle du téléphone.
+// Pictogrammes de l'en-tête des jeux (rendus côté serveur : visibles avant le chargement du script).
+const TAPSY_LOGO =
+  '<svg class="tp-logo" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9z"/><path d="M19 3v4M17 5h4" /></svg>';
+const TABLE_ICON =
+  '<svg class="tp-table-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11h14M7 11V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4M6 11l-1 8M18 11l1 8M8 15h8" /></svg>';
+
 app.get('/jouer/:table', async (req, res) => {
   const table = await dbGameStore.findTable(req.params.table);
   const lang = pickLocale(req.get('accept-language'), table?.locales ?? ['fr'], table?.defaultLocale ?? DEFAULT_LOCALE);
@@ -90,22 +96,21 @@ app.get('/jouer/:table/:lang', async (req, res) => {
     return;
   }
   const body = html`<main class="game-app">
-      <header class="game-header">
-        <p class="game-venue">${table.establishmentName}</p>
-        <p class="game-table">${t['game.table']} ${table.label}</p>
+      <header class="tp-header">
+        <p class="tp-brand">${raw(TAPSY_LOGO)}<span class="tp-brand-name">Tapsy</span><span class="tp-brand-by">${t['game.byMenupulse']}</span></p>
+        <p class="tp-table">${raw(TABLE_ICON)}<span>${t['game.table']} ${table.label}</span></p>
       </header>
       <div id="game-root" class="game-root" aria-live="polite">
         ${table.gamesOpen ? html`<p class="game-loading">${t['game.loading']}</p>` : html`<p class="game-notice">${t['game.closed']}</p>`}
       </div>
       <noscript><p class="game-notice">${t['game.noscript']}</p></noscript>
-      <footer class="game-footer">${t['game.poweredBy']}</footer>
     </main>`;
   res.type('html').send(
     await renderPage('tapsy', req.originalUrl, {
       lang,
       title: `${table.establishmentName} — ${t['game.title']}`,
       body,
-      data: table.gamesOpen ? { screen: 'game', table: req.params.table, tableLabel: table.label } : { screen: 'closed' },
+      data: table.gamesOpen ? { screen: 'game', table: req.params.table, tableLabel: table.label, venue: table.establishmentName } : { screen: 'closed' },
     }),
   );
 });

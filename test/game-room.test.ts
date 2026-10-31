@@ -101,3 +101,21 @@ test('chaque jeu se lance avec ses réglages par défaut et son contenu fourni',
 test('un réglage hors limites est refusé', () => {
   assert.equal(quizComptoir.settingsSchema.safeParse({ questionSeconds: 2 }).success, false);
 });
+
+test('les points de la soirée se cumulent par joueur, y compris après son départ', () => {
+  const scored: AnyGameDefinition = {
+    ...quizComptoir,
+    id: 'points',
+    setup: () => ({ done: false }),
+    onAction: () => ({ done: true }),
+    result: (state: { done: boolean }) => (state.done ? { ranking: [{ playerId: 'p1', score: 120 }, { playerId: 'p2', score: 30 }], vouchers: [] } : null),
+  };
+  const h = harness(players('Léa', 'Tom'));
+  h.start(scored);
+  h.act('p1', { t: 'answer', choice: 0 });
+  h.room.leave('p2');
+  h.start(scored);
+  h.act('p1', { t: 'answer', choice: 0 });
+  assert.deepEqual(h.room.standings.get('p1'), { pseudo: 'Léa', score: 240, games: 2 });
+  assert.deepEqual(h.room.standings.get('p2'), { pseudo: 'Tom', score: 30, games: 1 }, 'Tom est parti mais ses points restent à l’équipe');
+});
